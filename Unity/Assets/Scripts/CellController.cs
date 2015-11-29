@@ -59,4 +59,14 @@ public class CellController : MonoBehaviour {
         this.Invalidate();
         //Debug.Log(cell.gameObject.name);
     }
+
+    public static void ClearSelection()
+    {
+        foreach (CellController c in SelectedCells)
+        {
+            c.state = CellState.None;
+            c.Invalidate();
+        }
+        SelectedCells.Clear();
+    }
 }

@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class PlayerController : MonoBehaviour {
+    public readonly Vector2 MAP_OFFSET = new Vector2(-12f, 0f);
+
+    [HideInInspector]
     public GameController gameController;
     public List<List<CellController>> Cells;
     public const float CELL_SIZE = 60f;
@@ -30,7 +33,7 @@ public class PlayerController : MonoBehaviour {
                 if (!(i == 0 && j == 0))
                 {
                     CellPrefab.GetComponent<RectTransform>().sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
-                    GameObject o = Instantiate(CellPrefab, new Vector2((j - (GRID_SIZE + 1) / 2) * CELL_SIZE, (-i + (GRID_SIZE + 1) / 2) * CELL_SIZE), Quaternion.identity) as GameObject;
+                    GameObject o = Instantiate(CellPrefab, new Vector2((j - (GRID_SIZE + 1) / 2) * CELL_SIZE, (-i + (GRID_SIZE + 1) / 2) * CELL_SIZE) + MAP_OFFSET, Quaternion.identity) as GameObject;
                     o.transform.SetParent(canvas.transform, false);
                     if (i > 0 && j > 0)
                     {

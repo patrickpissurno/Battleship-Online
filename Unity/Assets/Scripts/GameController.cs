@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
+    public Text ErrorMsg;
+    [HideInInspector]
     public PlayerController playerController;
     public List<Ship> ships;
 	void Start () {
@@ -20,13 +23,14 @@ public class GameController : MonoBehaviour {
         switch (playerController.ValidateMap())
         {
             case 404:
-                Debug.LogError("Formação inválida");
+                ErrorMsg.text = "Formação inválida";
+                CellController.ClearSelection();
                 break;
             case 100:
-                Debug.LogError("Posicione todos os navios");
+                ErrorMsg.text = "Posicione todos os navios";
                 break;
             default:
-                Debug.Log("Mapa OK");
+                ErrorMsg.text = "Mapa OK";
                 break;
         }
     }
