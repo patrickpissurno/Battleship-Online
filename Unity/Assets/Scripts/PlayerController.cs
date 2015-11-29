@@ -107,6 +107,39 @@ public class PlayerController : MonoBehaviour {
 
                 if (shipCells.Count == 0)
                 {
+                    for (int j = cell.ID_j - 1; j >= 0; j--)
+                    {
+                        if (Cells[cell.ID_i][j].state != CellController.CellState.Selected)
+                            break;
+
+                        if (!CheckAvailability(shipCells.Count()))
+                            break;
+
+                        if (availableCells.IndexOf(Cells[cell.ID_i][j]) != -1)
+                        {
+                            CellController c = Cells[cell.ID_i][j];
+                            Debug.Log(c.name);
+                            availableCells.Remove(c);
+                            shipCells.Add(c);
+                        }
+                    }
+
+                    for (int j = cell.ID_i + 1; j < GRID_SIZE; j++)
+                    {
+                        if (Cells[cell.ID_i][j].state != CellController.CellState.Selected)
+                            break;
+
+                        if (!CheckAvailability(shipCells.Count()))
+                            break;
+
+                        if (availableCells.IndexOf(Cells[cell.ID_i][j]) != -1)
+                        {
+                            CellController c = Cells[cell.ID_i][j];
+                            Debug.Log(c.name);
+                            availableCells.Remove(c);
+                            shipCells.Add(c);
+                        }
+                    }
                 }
 
                 shipCells.Add(cell);
