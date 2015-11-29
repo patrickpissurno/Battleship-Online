@@ -30,14 +30,20 @@ public class PlayerController : MonoBehaviour {
                     GameObject o = Instantiate(CellPrefab, new Vector2((j - (GRID_SIZE + 1) / 2) * CELL_SIZE, (-i + (GRID_SIZE + 1) / 2) * CELL_SIZE), Quaternion.identity) as GameObject;
                     o.transform.SetParent(canvas.transform, false);
                     if (i > 0 && j > 0)
-                        o.name = (i) + ":" + LETTERS[j - 1];
+                    {
+                        o.name = (i - 1) + ":" + (j - 1);
+                        o.AddComponent<CellController>();
+                        Destroy(o.transform.Find("Text").gameObject);
+                    }
                     else
                     {
                         //HEADER
                         Text t = o.transform.Find("Text").GetComponent<Text>();
                         t.text = i == 0 ? LETTERS[j - 1] : i.ToString();
                         t.color = Color.white;
+                        o.name = "Header-" + t.text;
                         Destroy(o.GetComponent<Image>());
+                        Destroy(o.GetComponent<Button>());
                     }
                 }
             }
