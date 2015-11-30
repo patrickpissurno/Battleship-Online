@@ -13,10 +13,6 @@ public class GameController : MonoBehaviour {
         playerController = GetComponent<PlayerController>();
         ShipAmount.Init();
 	}
-	
-	void Update () {
-	
-	}
 
     public void Finish()
     {
@@ -31,6 +27,7 @@ public class GameController : MonoBehaviour {
                 break;
             default:
                 ErrorMsg.text = "Mapa OK";
+                ErrorMsg.text = Ship.Serialize(ships.ToArray());
                 break;
         }
     }
