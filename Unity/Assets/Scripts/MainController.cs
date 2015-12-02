@@ -432,8 +432,8 @@ public class MainController : MonoBehaviour {
 
     public IEnumerator CheckVictory()
     {
-        yield return new WaitForSeconds(.5f);
-        if (instance.gameController.ships.Count == 0)
+        yield return new WaitForSeconds(0);
+        if (instance.gameController.ships.Count == 1)
         {
             CellController.Locked = true;
             instance.MainGameTitle.text = "Você ganhou!";
@@ -463,12 +463,12 @@ public class MainController : MonoBehaviour {
         }
     }
 
-    public IEnumerator DeclareVictory()
+    public IEnumerator DeclareVictory(bool quit = false)
     {
         yield return new WaitForSeconds(.2f);
         WWWForm form = new WWWForm();
         form.AddField("id", MatchId);
-        form.AddField("user", User);
+        form.AddField("user", !quit ? User : (IsPlayer1 ? Player2 : Player1));
 
         WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_winner", form);
         yield return w;
@@ -476,5 +476,7 @@ public class MainController : MonoBehaviour {
         {
             print(w.error);
         }
+        else
+            Debug.LogWarning(w.text);
     }
 }
