@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 02-Dez-2015 às 14:45
+-- Generation Time: 02-Dez-2015 às 15:21
 -- Versão do servidor: 5.6.24
 -- PHP Version: 5.6.8
 
@@ -37,7 +37,17 @@ CREATE TABLE IF NOT EXISTS `matches` (
   `turn` varchar(30) NOT NULL,
   `winner` varchar(15) NOT NULL,
   `status` varchar(30) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Extraindo dados da tabela `matches`
+--
+
+INSERT INTO `matches` (`id`, `player1`, `player2`, `p1_ready`, `p2_ready`, `map1`, `map2`, `turn`, `winner`, `status`) VALUES
+(1, 'teste', 'teste', 0, 0, '', '', 'teste', '', 'running'),
+(2, 'teste', 'teste', 0, 0, '', '', 'teste', '', 'running'),
+(3, 'teste', 'teste2', 0, 0, '', '', 'teste', '', 'running'),
+(4, 'teste', 'teste2', 0, 0, '', '', 'teste', '', 'running');
 
 -- --------------------------------------------------------
 
@@ -85,7 +95,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `matches`
 --
 ALTER TABLE `matches`
-  MODIFY `id` int(9) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(9) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `users`
 --

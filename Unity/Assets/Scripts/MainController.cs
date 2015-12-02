@@ -65,9 +65,7 @@ public class MainController : MonoBehaviour {
                         Pass = pass;
                         Signed = true;
                         print("Signed-in");
-                        gameController.enabled = true;
-                        playerController.enabled = true;
-                        ScreenController.Change("MapSetup");
+                        ScreenController.Change("MainMenu");
                         break;
                     case "0":
                         User = "";
@@ -82,6 +80,42 @@ public class MainController : MonoBehaviour {
                         print("User not fount");
                         break;
 
+                    default:
+                        print(w.text);
+                        break;
+                }
+            }
+            Waiting = false;
+        }
+    }
+
+    public void Play()
+    {
+        ScreenController.Change("Matchmaking");
+        StartCoroutine(FindMatch());
+        //gameController.enabled = true;
+        //playerController.enabled = true;
+    }
+
+    public IEnumerator FindMatch()
+    {
+        yield return new WaitForSeconds(0f);
+        if (!Waiting)
+        {
+            Waiting = true;
+            WWWForm form = new WWWForm();
+            form.AddField("user", User);
+
+            WWW w = new WWW(SERVER_ADDRESS + "?act=matchmaking", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
+            {
+                print(w.error);
+            }
+            else
+            {
+                switch (w.text)
+                {
                     default:
                         print(w.text);
                         break;

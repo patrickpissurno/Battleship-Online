@@ -90,10 +90,6 @@ if(!empty($_GET["act"]))
 					// output data of each row
 					while($row = mysqli_fetch_assoc($result)) {
 						$id = $row["id"];
-						echo "player1=".$row["player1"]. ";" .
-						"player2=".$row["player2"]. ";" .
-						"matchid=".$id. ";" .
-						"";
 						break;
 					}
 					if($id != "-1")
@@ -101,6 +97,19 @@ if(!empty($_GET["act"]))
 						$sql = "UPDATE `matches` SET `player2`='" . $_POST["user"] . "', `status`='running' WHERE `id`=" . $id;
 						if(!mysqli_query($conn, $sql))
 							die ("-1");
+						$sql = "SELECT * FROM `matches` WHERE `id`=" . $id . "";
+						$result = mysqli_query($conn, $sql);
+						if (mysqli_num_rows($result) > 0) {
+							// output data of each row
+							while($row = mysqli_fetch_assoc($result)) {
+								$id = $row["id"];
+								echo "player1=".$row["player1"]. ";" .
+								"player2=".$row["player2"]. ";" .
+								"matchid=".$id. ";" .
+								"";
+								break;
+							}
+						}
 					}
 					else
 						echo "-1";
@@ -111,7 +120,7 @@ if(!empty($_GET["act"]))
 					VALUES ('". $_POST["user"] ."', '', '" . $_POST["user"] . "', 'open')";
 
 					if (mysqli_query($conn, $sql)) {
-						$sql = "SELECT * FROM `matches` WHERE `status`='open' and `player1`='" . $_POST["user"];
+						$sql = "SELECT * FROM `matches` WHERE `status`='open' and `player1`='" . $_POST["user"] . "'";
 						$result = mysqli_query($conn, $sql);
 						
 						$id = "-1";
