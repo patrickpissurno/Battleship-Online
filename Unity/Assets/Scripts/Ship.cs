@@ -23,7 +23,7 @@ public class Ship
         string result = "amount=" + ship.PieceAmount + "|pieces=";
         foreach (CellController cell in ship.Cells)
             result += cell.ID_j + ":" + cell.ID_i + (cell == ship.Cells[ship.Cells.Length-1] ? ";" : ",");
-        return result;
+        return result.Replace('=', '$').Replace(';', '&');
     }
 }
 

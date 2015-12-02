@@ -22,7 +22,8 @@ public class ScreenController : MonoBehaviour {
             bool a = s.Name == screen;
             foreach (GameObject o in s.Objects)
             {
-                o.SetActive(a);
+                bool bl = o.name == "Map" && (s.Name == "MainGame" || s.Name == "MapSetup");
+                o.SetActive(a || bl);
             }
         }
     }

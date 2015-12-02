@@ -25,6 +25,7 @@ public class MainController : MonoBehaviour {
     public string Player1;
     public string Player2;
     public string MatchId;
+    public bool IsPlayer1 = false;
 
     public const string SERVER_ADDRESS = "127.0.0.1/battleship.php";
 
@@ -137,6 +138,7 @@ public class MainController : MonoBehaviour {
                             {
                                 ScreenController.Change("WaitingForPlayer");
                                 StartCoroutine(WaitForPlayer());
+                                IsPlayer1 = true;
                             }
                             Player1 = keypair[1];
                             break;
@@ -146,6 +148,7 @@ public class MainController : MonoBehaviour {
                                 ScreenController.Change("MapSetup");
                                 gameController.enabled = true;
                                 playerController.enabled = true;
+                                IsPlayer1 = false;
                             }
                             Player2 = keypair[1];
                             break;
@@ -234,12 +237,104 @@ public class MainController : MonoBehaviour {
         }
         else
         {
-            print(w.text);
+            StartCoroutine(WaitForReady());
         }
     }
 
     public static void SendMap()
     {
         instance.StartCoroutine(instance.WriteMap());
+    }
+
+    public IEnumerator WaitForReady()
+    {
+        yield return new WaitForSeconds(.5f);
+        WWWForm form = new WWWForm();
+        form.AddField("id", MatchId);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
+        }
+        else
+        {
+            print(w.text);
+            string[] datas = w.text.Split(';');
+            bool p1_ready = false;
+            bool p2_ready = false;
+            string map = null;
+            foreach (string data in datas)
+            {
+                string[] keypair = data.Split('=');
+                switch (keypair[0])
+                {
+                    case "p1_ready":
+                        p1_ready = keypair[1] == "1" ? true : false;
+                        break;
+                    case "p2_ready":
+                        p2_ready = keypair[1] == "1" ? true : false;
+                        break;
+                    case "map1":
+                        if(!IsPlayer1)
+                            map = keypair[1].Replace('$', '=').Replace('&', ';');
+                        break;
+                    case "map2":
+                        if (IsPlayer1)
+                            map = keypair[1].Replace('$', '=').Replace('&', ';');
+                        break;
+                }
+            }
+            if (p1_ready && p2_ready)
+            {
+                CellController.ClearSelection();
+                ScreenController.Change("MainGame");
+                CellController.Locked = false;
+                CellController.Attack = true;
+                if (map != null)
+                {
+                    LoadMap(map);
+                }
+            }
+            else
+            {
+                StartCoroutine(WaitForReady());
+            }
+        }
+    }
+
+    public void LoadMap(string str)
+    {
+        gameController.ships.Clear();
+        string[] ships = str.Split(';');
+        foreach (string ship in ships)
+        {
+            string[] ship_datas = ship.Split('|');
+            Ship newShip = new Ship(0);
+            List<CellController> cellList = new List<CellController>();
+            foreach (string ship_data in ship_datas)
+            {
+                string[] keypair = ship_data.Split('=');
+                switch (keypair[0])
+                {
+                    case "amount":
+                        newShip.PieceAmount = int.Parse(keypair[1]);
+                        break;
+                    case "pieces":
+                        string[] pieces = keypair[1].Split(',');
+                        foreach (string piece in pieces)
+                        {
+                            string[] p = piece.Split(':');
+                            CellController c = playerController.Cells[int.Parse(p[1])][int.Parse(p[0])];
+                            c.EnemyCell = true;
+                            cellList.Add(c);
+                        }
+                        newShip.Cells = cellList.ToArray();
+                        break;
+                }
+            }
+            gameController.ships.Add(newShip);
+        }
     }
 }

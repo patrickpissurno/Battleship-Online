@@ -6,11 +6,13 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Image))]
 [RequireComponent(typeof(Button))]
 public class CellController : MonoBehaviour {
+    public static bool Attack = false;
     public static bool Locked = false;
     public Button button;
     public Image image;
     public int ID_i;
     public int ID_j;
+    public bool EnemyCell = false;
     public enum CellState
     {
         None,
@@ -42,22 +44,32 @@ public class CellController : MonoBehaviour {
 
     public void Clicked(CellController cell)
     {
-        switch (this.state)
+        if (!Attack)
         {
-            case CellState.None:
-                if (SelectedCells.Count < ShipAmount.TotalCellAmount)
-                {
-                    this.state = CellState.Selected;
-                    SelectedCells.Add(this);
-                }
-                break;
-            case CellState.Selected:
-                this.state = CellState.None;
-                SelectedCells.Remove(this);
-                break;
+            switch (this.state)
+            {
+                case CellState.None:
+                    if (SelectedCells.Count < ShipAmount.TotalCellAmount)
+                    {
+                        this.state = CellState.Selected;
+                        SelectedCells.Add(this);
+                    }
+                    break;
+                case CellState.Selected:
+                    this.state = CellState.None;
+                    SelectedCells.Remove(this);
+                    break;
+            }
+            this.Invalidate();
+            //Debug.Log(cell.gameObject.name);
         }
-        this.Invalidate();
-        //Debug.Log(cell.gameObject.name);
+        else
+        {
+            if (EnemyCell)
+            {
+                print("Strike");
+            }
+        }
     }
 
     public static void ClearSelection()

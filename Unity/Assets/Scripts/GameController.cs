@@ -9,6 +9,8 @@ public class GameController : MonoBehaviour {
     public PlayerController playerController;
     public List<Ship> ships;
 	void Start () {
+        CellController.Locked = false;
+        CellController.Attack = false;
         ships = new List<Ship>();
         playerController = GetComponent<PlayerController>();
         ShipAmount.Init();
