@@ -29,6 +29,10 @@ public class MainController : MonoBehaviour {
 
     public Text MainGameTitle;
 
+    public int Attacks = 3;
+
+    public bool GameEnded = false;
+
     public const string SERVER_ADDRESS = "127.0.0.1/battleship.php";
 
     void Awake()
@@ -167,35 +171,38 @@ public class MainController : MonoBehaviour {
     private IEnumerator WaitForPlayer()
     {
         yield return new WaitForSeconds(.5f);
-        WWWForm form = new WWWForm();
-        form.AddField("id", MatchId);
+        if (!GameEnded)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("id", MatchId);
 
-        WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
-        yield return w;
-        if (!string.IsNullOrEmpty(w.error))
-        {
-            print(w.error);
-        }
-        else
-        {
-            print(w.text);
-            string[] datas = w.text.Split(';');
-            foreach (string data in datas)
+            WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
             {
-                string[] keypair = data.Split('=');
-                switch (keypair[0])
+                print(w.error);
+            }
+            else
+            {
+                print(w.text);
+                string[] datas = w.text.Split(';');
+                foreach (string data in datas)
                 {
-                    case "player2":
-                        if (!string.IsNullOrEmpty(keypair[1]))
-                        {
-                            ScreenController.Change("MapSetup");
-                            gameController.enabled = true;
-                            playerController.enabled = true;
-                        }
-                        else
-                            StartCoroutine(WaitForPlayer());
-                        Player2 = keypair[1];
-                        break;
+                    string[] keypair = data.Split('=');
+                    switch (keypair[0])
+                    {
+                        case "player2":
+                            if (!string.IsNullOrEmpty(keypair[1]))
+                            {
+                                ScreenController.Change("MapSetup");
+                                gameController.enabled = true;
+                                playerController.enabled = true;
+                            }
+                            else
+                                StartCoroutine(WaitForPlayer());
+                            Player2 = keypair[1];
+                            break;
+                    }
                 }
             }
         }
@@ -204,22 +211,25 @@ public class MainController : MonoBehaviour {
     public IEnumerator WriteMap()
     {
         yield return new WaitForSeconds(0f);
-        WWWForm form = new WWWForm();
-        form.AddField("id", MatchId);
-        form.AddField("user", User);
-        form.AddField("map", Ship.Serialize(gameController.ships.ToArray()));
+        if (!GameEnded)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("id", MatchId);
+            form.AddField("user", User);
+            form.AddField("map", Ship.Serialize(gameController.ships.ToArray()));
 
-        WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_map", form);
-        yield return w;
-        if (!string.IsNullOrEmpty(w.error))
-        {
-            print(w.error);
-        }
-        else
-        {
-            if (!w.text.Equals("-1"))
+            WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_map", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
             {
-                StartCoroutine(SetReady());
+                print(w.error);
+            }
+            else
+            {
+                if (!w.text.Equals("-1"))
+                {
+                    StartCoroutine(SetReady());
+                }
             }
         }
     }
@@ -227,19 +237,22 @@ public class MainController : MonoBehaviour {
     public IEnumerator SetReady()
     {
         yield return new WaitForSeconds(.2f);
-        WWWForm form = new WWWForm();
-        form.AddField("id", MatchId);
-        form.AddField("user", User);
+        if (!GameEnded)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("id", MatchId);
+            form.AddField("user", User);
 
-        WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_ready", form);
-        yield return w;
-        if (!string.IsNullOrEmpty(w.error))
-        {
-            print(w.error);
-        }
-        else
-        {
-            StartCoroutine(WaitForReady());
+            WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_ready", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
+            {
+                print(w.error);
+            }
+            else
+            {
+                StartCoroutine(WaitForReady());
+            }
         }
     }
 
@@ -251,58 +264,64 @@ public class MainController : MonoBehaviour {
     public IEnumerator WaitForReady()
     {
         yield return new WaitForSeconds(.5f);
-        WWWForm form = new WWWForm();
-        form.AddField("id", MatchId);
+        if (!GameEnded)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("id", MatchId);
 
-        WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
-        yield return w;
-        if (!string.IsNullOrEmpty(w.error))
-        {
-            print(w.error);
-        }
-        else
-        {
-            print(w.text);
-            string[] datas = w.text.Split(';');
-            bool p1_ready = false;
-            bool p2_ready = false;
-            string map = null;
-            foreach (string data in datas)
+            WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
             {
-                string[] keypair = data.Split('=');
-                switch (keypair[0])
-                {
-                    case "p1_ready":
-                        p1_ready = keypair[1] == "1" ? true : false;
-                        break;
-                    case "p2_ready":
-                        p2_ready = keypair[1] == "1" ? true : false;
-                        break;
-                    case "map1":
-                        if(!IsPlayer1)
-                            map = keypair[1].Replace('$', '=').Replace('&', ';');
-                        break;
-                    case "map2":
-                        if (IsPlayer1)
-                            map = keypair[1].Replace('$', '=').Replace('&', ';');
-                        break;
-                }
-            }
-            if (p1_ready && p2_ready)
-            {
-                CellController.ClearSelection();
-                ScreenController.Change("MainGame");
-                MainGameTitle.text = IsPlayer1 ? "Seu turno" : "Turno do oponente";
-                CellController.Locked = false;
-                CellController.Attack = true;
-                if (map != null)
-                {
-                    LoadMap(map);
-                }
+                print(w.error);
             }
             else
             {
-                StartCoroutine(WaitForReady());
+                print(w.text);
+                string[] datas = w.text.Split(';');
+                bool p1_ready = false;
+                bool p2_ready = false;
+                string map = null;
+                foreach (string data in datas)
+                {
+                    string[] keypair = data.Split('=');
+                    switch (keypair[0])
+                    {
+                        case "p1_ready":
+                            p1_ready = keypair[1] == "1" ? true : false;
+                            break;
+                        case "p2_ready":
+                            p2_ready = keypair[1] == "1" ? true : false;
+                            break;
+                        case "map1":
+                            if (!IsPlayer1)
+                                map = keypair[1].Replace('$', '=').Replace('&', ';');
+                            break;
+                        case "map2":
+                            if (IsPlayer1)
+                                map = keypair[1].Replace('$', '=').Replace('&', ';');
+                            break;
+                    }
+                }
+                if (p1_ready && p2_ready)
+                {
+                    GameEnded = false;
+                    CellController.ClearSelection();
+                    ScreenController.Change("MainGame");
+                    MainGameTitle.text = IsPlayer1 ? "Seu turno" : "Turno do oponente";
+                    if (!IsPlayer1)
+                        StartCoroutine(WaitForTurn());
+                    CellController.Locked = !IsPlayer1;
+                    CellController.Attack = true;
+                    if (map != null)
+                    {
+                        LoadMap(map);
+                    }
+                }
+                else
+                {
+                    StartCoroutine(WaitForReady());
+                }
             }
         }
     }
@@ -338,6 +357,124 @@ public class MainController : MonoBehaviour {
                 }
             }
             gameController.ships.Add(newShip);
+        }
+    }
+
+    IEnumerator WaitForTurn()
+    {
+        print("Executed");
+        yield return new WaitForSeconds(.5f);
+        if (!GameEnded)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("id", MatchId);
+
+            WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
+            {
+                print(w.error);
+            }
+            else
+            {
+                print(w.text);
+                string[] datas = w.text.Split(';');
+                foreach (string data in datas)
+                {
+                    string[] keypair = data.Split('=');
+                    switch (keypair[0])
+                    {
+                        case "turn":
+                            if (keypair[1].Equals(User))
+                            {
+                                if (MainGameTitle.text != "Seu turno")
+                                {
+                                    Attacks = 3;
+                                    CellController.Locked = false;
+                                    MainGameTitle.text = "Seu turno";
+                                }
+                            }
+                            else
+                                StartCoroutine(WaitForTurn());
+                            break;
+                        case "winner":
+                            if (!string.IsNullOrEmpty(keypair[1]))
+                            {
+                                CellController.Locked = true;
+                                GameEnded = true;
+                                MainGameTitle.text = "Você perdeu!";
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    public static void DoAttack()
+    {
+        if (!instance.GameEnded)
+        {
+            if (instance.Attacks > 1)
+            {
+                instance.Attacks--;
+                //Check if ship length > 0, to declare victory
+                instance.StartCoroutine(instance.CheckVictory());
+            }
+            else
+            {
+                CellController.Locked = true;
+                instance.MainGameTitle.text = "Turno do oponente";
+                instance.StartCoroutine(instance.NextTurn());
+            }
+        }
+    }
+
+    public IEnumerator CheckVictory()
+    {
+        yield return new WaitForSeconds(.5f);
+        if (instance.gameController.ships.Count == 0)
+        {
+            CellController.Locked = true;
+            instance.MainGameTitle.text = "Você ganhou!";
+            instance.StartCoroutine(instance.DeclareVictory());
+        }
+    }
+
+    public IEnumerator NextTurn()
+    {
+        yield return new WaitForSeconds(.2f);
+        if (!GameEnded)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("id", MatchId);
+            form.AddField("user", User);
+
+            WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_endturn", form);
+            yield return w;
+            if (!string.IsNullOrEmpty(w.error))
+            {
+                print(w.error);
+            }
+            else
+            {
+                StartCoroutine(WaitForTurn());
+            }
+        }
+    }
+
+    public IEnumerator DeclareVictory()
+    {
+        yield return new WaitForSeconds(.2f);
+        WWWForm form = new WWWForm();
+        form.AddField("id", MatchId);
+        form.AddField("user", User);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_winner", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
         }
     }
 }

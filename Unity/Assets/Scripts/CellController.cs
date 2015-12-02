@@ -65,30 +65,34 @@ public class CellController : MonoBehaviour {
         }
         else
         {
-            if (EnemyCell)
+            if (!Locked)
             {
-                foreach (Ship s in GameController.instance.ships)
+                if (EnemyCell)
                 {
-                    bool found = false;
-                    foreach (CellController c in s.Cells)
+                    foreach (Ship s in GameController.instance.ships)
                     {
-                        if (c == this)
+                        bool found = false;
+                        foreach (CellController c in s.Cells)
                         {
-                            found = true;
+                            if (c == this)
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found)
+                        {
+                            foreach (CellController c in s.Cells)
+                            {
+                                c.state = CellState.Selected;
+                                c.Invalidate();
+                            }
+                            GameController.instance.ships.Remove(s);
                             break;
                         }
                     }
-                    if (found)
-                    {
-                        foreach (CellController c in s.Cells)
-                        {
-                            c.state = CellState.Selected;
-                            c.Invalidate();
-                        }
-                        GameController.instance.ships.Remove(s);
-                        break;
-                    }
                 }
+                MainController.DoAttack();
             }
         }
     }
