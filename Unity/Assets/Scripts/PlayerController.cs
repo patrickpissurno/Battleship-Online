@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
         gameController = GetComponent<GameController>();
         Cells = new List<List<CellController>>();
-        canvas = GameObject.Find("Canvas");
+        canvas = GameObject.Find("Canvas").transform.Find("Map").gameObject;
         GenerateMap();
 	}
 

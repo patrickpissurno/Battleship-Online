@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 30-Nov-2015 às 15:20
+-- Generation Time: 02-Dez-2015 às 14:45
 -- Versão do servidor: 5.6.24
 -- PHP Version: 5.6.8
 
@@ -30,8 +30,11 @@ CREATE TABLE IF NOT EXISTS `matches` (
   `id` int(9) NOT NULL,
   `player1` varchar(30) NOT NULL,
   `player2` varchar(30) NOT NULL,
+  `p1_ready` int(1) NOT NULL,
+  `p2_ready` int(1) NOT NULL,
   `map1` varchar(150) NOT NULL,
   `map2` varchar(150) NOT NULL,
+  `turn` varchar(30) NOT NULL,
   `winner` varchar(15) NOT NULL,
   `status` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -48,7 +51,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `pass` varchar(30) NOT NULL,
   `wins` int(9) NOT NULL,
   `loses` int(9) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Extraindo dados da tabela `users`
+--
+
+INSERT INTO `users` (`id`, `user`, `pass`, `wins`, `loses`) VALUES
+(1, 'teste', '123', 0, 0),
+(2, 'teste2', '123', 0, 0);
 
 --
 -- Indexes for dumped tables
@@ -79,7 +90,7 @@ ALTER TABLE `matches`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(9) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(9) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
