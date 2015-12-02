@@ -4,10 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
+    public static GameController instance;
     public Text ErrorMsg;
     [HideInInspector]
     public PlayerController playerController;
     public List<Ship> ships;
+
+    void Awake()
+    {
+        instance = this;
+    }
+
 	void Start () {
         CellController.Locked = false;
         CellController.Attack = false;

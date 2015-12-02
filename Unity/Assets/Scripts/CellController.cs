@@ -67,7 +67,28 @@ public class CellController : MonoBehaviour {
         {
             if (EnemyCell)
             {
-                print("Strike");
+                foreach (Ship s in GameController.instance.ships)
+                {
+                    bool found = false;
+                    foreach (CellController c in s.Cells)
+                    {
+                        if (c == this)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found)
+                    {
+                        foreach (CellController c in s.Cells)
+                        {
+                            c.state = CellState.Selected;
+                            c.Invalidate();
+                        }
+                        GameController.instance.ships.Remove(s);
+                        break;
+                    }
+                }
             }
         }
     }

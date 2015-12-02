@@ -27,6 +27,8 @@ public class MainController : MonoBehaviour {
     public string MatchId;
     public bool IsPlayer1 = false;
 
+    public Text MainGameTitle;
+
     public const string SERVER_ADDRESS = "127.0.0.1/battleship.php";
 
     void Awake()
@@ -290,6 +292,7 @@ public class MainController : MonoBehaviour {
             {
                 CellController.ClearSelection();
                 ScreenController.Change("MainGame");
+                MainGameTitle.text = IsPlayer1 ? "Seu turno" : "Turno do oponente";
                 CellController.Locked = false;
                 CellController.Attack = true;
                 if (map != null)
