@@ -26,8 +26,9 @@ public class GameController : MonoBehaviour {
                 ErrorMsg.text = "Posicione todos os navios";
                 break;
             default:
-                ErrorMsg.text = "Mapa OK";
-                ErrorMsg.text = Ship.Serialize(ships.ToArray());
+                ErrorMsg.text = "Aguardando o outro jogador...";
+                MainController.SendMap();
+                CellController.Locked = true;
                 break;
         }
     }

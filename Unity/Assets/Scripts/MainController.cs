@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 public class MainController : MonoBehaviour {
 
+    private static MainController instance;
+
     [HideInInspector]
     public string User;
     [HideInInspector]
@@ -20,7 +22,16 @@ public class MainController : MonoBehaviour {
     public InputField user;
     public InputField pass;
 
-    public const string SERVER_ADDRESS = "10.10.11.42:8088/battleship.php";
+    public string Player1;
+    public string Player2;
+    public string MatchId;
+
+    public const string SERVER_ADDRESS = "127.0.0.1/battleship.php";
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     void GetComp()
     {
@@ -114,14 +125,121 @@ public class MainController : MonoBehaviour {
             }
             else
             {
-                switch (w.text)
+                print(w.text);
+                string[] datas = w.text.Split(';');
+                foreach (string data in datas)
                 {
-                    default:
-                        print(w.text);
-                        break;
+                    string[] keypair = data.Split('=');
+                    switch (keypair[0])
+                    {
+                        case "player1":
+                            if (keypair[1].Equals(User))
+                            {
+                                ScreenController.Change("WaitingForPlayer");
+                                StartCoroutine(WaitForPlayer());
+                            }
+                            Player1 = keypair[1];
+                            break;
+                        case "player2":
+                            if (keypair[1].Equals(User))
+                            {
+                                ScreenController.Change("MapSetup");
+                                gameController.enabled = true;
+                                playerController.enabled = true;
+                            }
+                            Player2 = keypair[1];
+                            break;
+                        case "matchid":
+                            MatchId = keypair[1];
+                            break;
+                    }
                 }
             }
             Waiting = false;
         }
+    }
+
+    private IEnumerator WaitForPlayer()
+    {
+        yield return new WaitForSeconds(.5f);
+        WWWForm form = new WWWForm();
+        form.AddField("id", MatchId);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
+        }
+        else
+        {
+            print(w.text);
+            string[] datas = w.text.Split(';');
+            foreach (string data in datas)
+            {
+                string[] keypair = data.Split('=');
+                switch (keypair[0])
+                {
+                    case "player2":
+                        if (!string.IsNullOrEmpty(keypair[1]))
+                        {
+                            ScreenController.Change("MapSetup");
+                            gameController.enabled = true;
+                            playerController.enabled = true;
+                        }
+                        else
+                            StartCoroutine(WaitForPlayer());
+                        Player2 = keypair[1];
+                        break;
+                }
+            }
+        }
+    }
+
+    public IEnumerator WriteMap()
+    {
+        yield return new WaitForSeconds(0f);
+        WWWForm form = new WWWForm();
+        form.AddField("id", MatchId);
+        form.AddField("user", User);
+        form.AddField("map", Ship.Serialize(gameController.ships.ToArray()));
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_map", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
+        }
+        else
+        {
+            if (!w.text.Equals("-1"))
+            {
+                StartCoroutine(SetReady());
+            }
+        }
+    }
+
+    public IEnumerator SetReady()
+    {
+        yield return new WaitForSeconds(.2f);
+        WWWForm form = new WWWForm();
+        form.AddField("id", MatchId);
+        form.AddField("user", User);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=write_match_ready", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
+        }
+        else
+        {
+            print(w.text);
+        }
+    }
+
+    public static void SendMap()
+    {
+        instance.StartCoroutine(instance.WriteMap());
     }
 }
