@@ -36,7 +36,7 @@ public class MainController : MonoBehaviour {
 
     public bool GameEnded = false;
 
-    public const string SERVER_ADDRESS = "127.0.0.1/battleship.php";
+    public const string SERVER_ADDRESS = "10.10.11.42:8088/battleship.php";
 
     void Awake()
     {
@@ -458,7 +458,7 @@ public class MainController : MonoBehaviour {
     public IEnumerator CheckVictory()
     {
         yield return new WaitForSeconds(0);
-        if (instance.gameController.ships.Count == 1)
+        if (ShipAmount.TotalCellAmount <= 0)
         {
             CellController.Locked = true;
             GameEnded = true;
