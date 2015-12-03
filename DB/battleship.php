@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "toor";
 $dbname = "battleship";
 
 // Create connection
@@ -60,6 +60,52 @@ if(!empty($_GET["act"]))
 		case "read_match":
 			if(!empty($_POST["id"]))
 			{
+                
+                $date = date_create();
+                $date = date_timestamp_get($date);
+                $p1_online = $date;
+                $p2_online = $date;
+                
+                $sql = "SELECT * FROM `matches` WHERE `id`='".$_POST["id"]."'";
+				$result = mysqli_query($conn, $sql);
+
+				if (mysqli_num_rows($result) > 0) {
+					// output data of each row
+					while($row = mysqli_fetch_assoc($result)) {
+                        $p1 = $row["player1"];
+                        $p2 = $row["player2"];
+                    }
+                }
+                
+                $sql = "SELECT * FROM `users` WHERE `user`='" . $p1 . "'";
+				$result = mysqli_query($conn, $sql);
+
+				if (mysqli_num_rows($result) > 0) {
+					// output data of each row
+					while($row = mysqli_fetch_assoc($result)) {
+                        $p1_online = intval($row["last_online"]);
+                    }
+                }
+                
+                $sql = "SELECT * FROM `users` WHERE `user`='" . $p2 . "'";
+				$result = mysqli_query($conn, $sql);
+
+				if (mysqli_num_rows($result) > 0) {
+					// output data of each row
+					while($row = mysqli_fetch_assoc($result)) {
+                        $p2_online = intval($row["last_online"]);
+                    }
+                }
+                
+                
+                
+                if($date - $p1_online > 10 || $date - $p2_online > 10)
+                {
+                    $sql = "UPDATE `matches` SET `status`='closed' WHERE `id`=" . $_POST["id"];	
+                    if(!mysqli_query($conn, $sql))
+                        die ("-1");
+                }
+                
 				$sql = "SELECT * FROM `matches` WHERE `id`='".$_POST["id"]."'";
 				$result = mysqli_query($conn, $sql);
 
@@ -68,10 +114,13 @@ if(!empty($_GET["act"]))
 					while($row = mysqli_fetch_assoc($result)) {
 						echo "player1=".$row["player1"]. ";" .
 						"player2=".$row["player2"]. ";" .
-						"map1={".$row["map1"]. "};" .
-						"map2={".$row["map2"]. "};" .
+						"map1=".$row["map1"]. ";" .
+						"map2=".$row["map2"]. ";" .
 						"winner=".$row["winner"]. ";" .
+                        "p1_ready=".$row["p1_ready"]. ";" .
+                        "p2_ready=".$row["p2_ready"]. ";" .
 						"status=".$row["status"]. ";" .
+                        "turn=".$row["turn"]. ";" .
 						"";
 					}
 				} else {
@@ -127,7 +176,8 @@ if(!empty($_GET["act"]))
 						if (mysqli_num_rows($result) > 0) {
 								while($row = mysqli_fetch_assoc($result)) {
 								$id = $row["id"];
-								echo "matchid=".$id. ";" . 
+								echo "player1=".$row["player1"]. ";" .
+                                "matchid=".$id. ";" . 
 								"";
 								break;
 							}
@@ -197,6 +247,31 @@ if(!empty($_GET["act"]))
 				$sql = "UPDATE `matches` SET `winner`='" . $_POST["user"] . "', `status`='closed' WHERE `id`=" . $_POST["id"];	
 				if(!mysqli_query($conn, $sql))
 					die ("-1");
+                
+                $sql = "UPDATE `users` SET `wins`=`wins`+1 WHERE `user`='" . $_POST["user"]."'";	
+				if(!mysqli_query($conn, $sql))
+					die ("-1");
+                
+                //GET LOOSER
+                $sql = "SELECT * FROM `matches` WHERE `id`=" . $_POST["id"];
+				$result = mysqli_query($conn, $sql);
+				
+				$looser = -1;
+				if (mysqli_num_rows($result) > 0) {
+					// output data of each row
+					while($row = mysqli_fetch_assoc($result)) {
+						if($row["player2"] == $_POST["user"])
+							$looser = $row["player1"];
+                        else
+                            $looser = $row["player2"];
+						break;
+					}
+				}
+                
+                $sql = "UPDATE `users` SET `loses`=`loses`+1 WHERE `user`='" . $looser . "'";	
+				if(!mysqli_query($conn, $sql))
+					die ("-1");
+                
 			}
 			break;
 		case "write_match_ready":
@@ -224,6 +299,15 @@ if(!empty($_GET["act"]))
 						die ("-1");
 			}
 			break;
+        case "write_user_online":
+            if(!empty($_POST["user"]))
+            {
+                $date = date_create();
+                $sql = "UPDATE `users` SET `last_online`='" . date_timestamp_get($date) . "' WHERE `user`='" . $_POST["user"]."'";	
+				if(!mysqli_query($conn, $sql))
+					die ("-1");
+            }
+            break;
 	}
 }
 

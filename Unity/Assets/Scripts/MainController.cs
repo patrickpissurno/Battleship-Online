@@ -7,9 +7,9 @@ public class MainController : MonoBehaviour {
     private static MainController instance;
 
     [HideInInspector]
-    public string User;
+    public static string User = null;
     [HideInInspector]
-    public string Pass;
+    public static string Pass = null;
     [HideInInspector]
     public bool Signed = false;
     [HideInInspector]
@@ -28,6 +28,9 @@ public class MainController : MonoBehaviour {
     public bool IsPlayer1 = false;
 
     public Text MainGameTitle;
+    private Text MainGameMessage;
+
+    public Text MapSetupMessage;
 
     public int Attacks = 3;
 
@@ -44,9 +47,12 @@ public class MainController : MonoBehaviour {
     {
         gameController = GetComponent<GameController>();
         playerController = GetComponent<PlayerController>();
+        MainGameMessage = MainGameTitle.transform.Find("ErrorMessage").GetComponent<Text>();
     }
 	void Start () {
         GetComp();
+        if(User != null && Pass != null)
+            StartCoroutine(Login(User, Pass));
 	}
 	
 	// Update is called once per frame
@@ -83,6 +89,7 @@ public class MainController : MonoBehaviour {
                         Pass = pass;
                         Signed = true;
                         print("Signed-in");
+                        StartCoroutine(WriteOnline());
                         ScreenController.Change("MainMenu");
                         break;
                     case "0":
@@ -107,12 +114,27 @@ public class MainController : MonoBehaviour {
         }
     }
 
+    private IEnumerator WriteOnline()
+    {
+        yield return new WaitForSeconds(.25f);
+        WWWForm form = new WWWForm();
+        form.AddField("user", User);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=write_user_online", form);
+        yield return w;
+        StartCoroutine(WriteOnline());
+    }
+
     public void Play()
     {
+        GameEnded = false;
+        MainGameMessage.text = "";
+        MapSetupMessage.text = "";
+        CellController.ClearSelection();
+        CellController.Locked = false;
+        CellController.Attack = false;
         ScreenController.Change("Matchmaking");
         StartCoroutine(FindMatch());
-        //gameController.enabled = true;
-        //playerController.enabled = true;
     }
 
     public IEnumerator FindMatch()
@@ -155,6 +177,7 @@ public class MainController : MonoBehaviour {
                                 gameController.enabled = true;
                                 playerController.enabled = true;
                                 IsPlayer1 = false;
+                                StartCoroutine(ReadMatchStatus());
                             }
                             Player2 = keypair[1];
                             break;
@@ -197,6 +220,7 @@ public class MainController : MonoBehaviour {
                                 ScreenController.Change("MapSetup");
                                 gameController.enabled = true;
                                 playerController.enabled = true;
+                                StartCoroutine(ReadMatchStatus());
                             }
                             else
                                 StartCoroutine(WaitForPlayer());
@@ -403,6 +427,7 @@ public class MainController : MonoBehaviour {
                                 CellController.Locked = true;
                                 GameEnded = true;
                                 MainGameTitle.text = "Você perdeu!";
+                                StartCoroutine(ReturnToMenu());
                             }
                             break;
                     }
@@ -436,8 +461,10 @@ public class MainController : MonoBehaviour {
         if (instance.gameController.ships.Count == 1)
         {
             CellController.Locked = true;
+            GameEnded = true;
             instance.MainGameTitle.text = "Você ganhou!";
             instance.StartCoroutine(instance.DeclareVictory());
+            StartCoroutine(ReturnToMenu());
         }
     }
 
@@ -478,5 +505,59 @@ public class MainController : MonoBehaviour {
         }
         else
             Debug.LogWarning(w.text);
+    }
+
+    private IEnumerator ReadMatchStatus()
+    {
+        yield return new WaitForSeconds(1f);
+        WWWForm form = new WWWForm();
+        form.AddField("id", MatchId);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=read_match", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
+        }
+        else
+        {
+            string[] datas = w.text.Split(';');
+            foreach (string data in datas)
+            {
+                string[] keypair = data.Split('=');
+                switch (keypair[0])
+                {
+                    case "status":
+                        if (keypair[1] == "closed" && !GameEnded)
+                        {
+                            //Match Error
+                            CellController.Locked = true;
+                            ScreenController.Change("MainGame");
+                            GameObject.Find("Map").SetActive(false);
+                            instance.MainGameTitle.text = "Empate (desconexão)";
+                            StartCoroutine(ReturnToMenu());
+                        }
+                        else
+                            StartCoroutine(ReadMatchStatus());
+                        break;
+                }
+            }
+        }
+    }
+
+    private IEnumerator ReturnToMenu()
+    {
+        if (!Waiting)
+        {
+            Waiting = true;
+            for (int i = 3; i > 0; i--)
+            {
+                MainGameMessage.text = "Voltando ao menu em " + i;
+                yield return new WaitForSeconds(1f);
+            }
+            ScreenController.Change("MainMenu");
+            Application.LoadLevel(0);
+            Waiting = false;
+        }
     }
 }

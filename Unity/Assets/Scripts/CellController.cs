@@ -99,11 +99,14 @@ public class CellController : MonoBehaviour {
 
     public static void ClearSelection()
     {
-        foreach (CellController c in SelectedCells)
+        if (SelectedCells != null)
         {
-            c.state = CellState.None;
-            c.Invalidate();
+            foreach (CellController c in SelectedCells)
+            {
+                c.state = CellState.None;
+                c.Invalidate();
+            }
+            SelectedCells.Clear();
         }
-        SelectedCells.Clear();
     }
 }
