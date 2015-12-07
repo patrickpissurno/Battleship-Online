@@ -28,14 +28,14 @@ public class GameController : MonoBehaviour {
         switch (playerController.ValidateMap())
         {
             case 404:
-                ErrorMsg.text = "Formação inválida";
+                ErrorMsg.text = "Invalid formation";
                 CellController.ClearSelection();
                 break;
             case 100:
-                ErrorMsg.text = "Posicione todos os navios";
+                ErrorMsg.text = "Place all your ships";
                 break;
             default:
-                ErrorMsg.text = "Aguardando o outro jogador...";
+                ErrorMsg.text = "Waiting for the other player...";
                 MainController.SendMap();
                 CellController.Locked = true;
                 break;
