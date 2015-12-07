@@ -27,6 +27,17 @@ public class MainController : MonoBehaviour {
     public string MatchId;
     public bool IsPlayer1 = false;
 
+    [HideInInspector]
+    public int Wins = 0;
+    [HideInInspector]
+    public int Loses = 0;
+    [HideInInspector]
+    public float WLRatio = 0;
+
+    public Text P_WinLoses;
+    public Text P_WL;
+    public Text P_Name;
+
     public Text MainGameTitle;
     private Text MainGameMessage;
 
@@ -36,7 +47,7 @@ public class MainController : MonoBehaviour {
 
     public bool GameEnded = false;
 
-    public const string SERVER_ADDRESS = "10.10.11.42:8088/battleship.php";
+    public const string SERVER_ADDRESS = "localhost/battleship.php";
 
     void Awake()
     {
@@ -53,11 +64,6 @@ public class MainController : MonoBehaviour {
         GetComp();
         if(User != null && Pass != null)
             StartCoroutine(Login(User, Pass));
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
 	}
 
     public void LoginButton()
@@ -112,6 +118,17 @@ public class MainController : MonoBehaviour {
             }
             Waiting = false;
         }
+    }
+
+    public void MainMenu()
+    {
+        ScreenController.Change("MainMenu");
+    }
+
+    public void Profile()
+    {
+        ScreenController.Change("Profile");
+        StartCoroutine(UpdateProfile());
     }
 
     private IEnumerator WriteOnline()
@@ -332,7 +349,7 @@ public class MainController : MonoBehaviour {
                     GameEnded = false;
                     CellController.ClearSelection();
                     ScreenController.Change("MainGame");
-                    MainGameTitle.text = IsPlayer1 ? "Seu turno" : "Turno do oponente";
+                    MainGameTitle.text = IsPlayer1 ? "Your turn" : "Enemy's turn";
                     if (!IsPlayer1)
                         StartCoroutine(WaitForTurn());
                     CellController.Locked = !IsPlayer1;
@@ -411,11 +428,11 @@ public class MainController : MonoBehaviour {
                         case "turn":
                             if (keypair[1].Equals(User))
                             {
-                                if (MainGameTitle.text != "Seu turno")
+                                if (MainGameTitle.text != "Your turn")
                                 {
                                     Attacks = 3;
                                     CellController.Locked = false;
-                                    MainGameTitle.text = "Seu turno";
+                                    MainGameTitle.text = "Your turn";
                                 }
                             }
                             else
@@ -426,7 +443,7 @@ public class MainController : MonoBehaviour {
                             {
                                 CellController.Locked = true;
                                 GameEnded = true;
-                                MainGameTitle.text = "Você perdeu!";
+                                MainGameTitle.text = "You lost!";
                                 StartCoroutine(ReturnToMenu());
                             }
                             break;
@@ -449,7 +466,7 @@ public class MainController : MonoBehaviour {
             else
             {
                 CellController.Locked = true;
-                instance.MainGameTitle.text = "Turno do oponente";
+                instance.MainGameTitle.text = "Enemy's turn";
                 instance.StartCoroutine(instance.NextTurn());
             }
         }
@@ -462,7 +479,7 @@ public class MainController : MonoBehaviour {
         {
             CellController.Locked = true;
             GameEnded = true;
-            instance.MainGameTitle.text = "Você ganhou!";
+            instance.MainGameTitle.text = "You won!";
             instance.StartCoroutine(instance.DeclareVictory());
             StartCoroutine(ReturnToMenu());
         }
@@ -534,7 +551,7 @@ public class MainController : MonoBehaviour {
                             CellController.Locked = true;
                             ScreenController.Change("MainGame");
                             GameObject.Find("Map").SetActive(false);
-                            instance.MainGameTitle.text = "Empate (desconexão)";
+                            instance.MainGameTitle.text = "Draw (connection problem)";
                             StartCoroutine(ReturnToMenu());
                         }
                         else
@@ -545,6 +562,41 @@ public class MainController : MonoBehaviour {
         }
     }
 
+    private IEnumerator UpdateProfile()
+    {
+        yield return new WaitForSeconds(0f);
+        WWWForm form = new WWWForm();
+        form.AddField("user", User);
+
+        WWW w = new WWW(SERVER_ADDRESS + "?act=read_user", form);
+        yield return w;
+        if (!string.IsNullOrEmpty(w.error))
+        {
+            print(w.error);
+        }
+        else
+        {
+            string[] datas = w.text.Split(';');
+            foreach (string data in datas)
+            {
+                string[] keypair = data.Split('=');
+                switch (keypair[0])
+                {
+                    case "wins":
+                        Wins = int.Parse(keypair[1]);
+                        break;
+                    case "loses":
+                        Loses = int.Parse(keypair[1]);
+                        break;
+                }
+            }
+            WLRatio = Loses != 0 ? ((float)Wins) / Loses : 1;
+            P_Name.text = "Name: " + User;
+            P_WinLoses.text = "Wins: " + Wins.ToString() + " | Loses: " + Loses.ToString();
+            P_WL.text = "W/L: " + WLRatio.ToString();
+        }
+    }
+
     private IEnumerator ReturnToMenu()
     {
         if (!Waiting)
@@ -552,7 +604,7 @@ public class MainController : MonoBehaviour {
             Waiting = true;
             for (int i = 3; i > 0; i--)
             {
-                MainGameMessage.text = "Voltando ao menu em " + i;
+                MainGameMessage.text = "Returning to menu in " + i;
                 yield return new WaitForSeconds(1f);
             }
             ScreenController.Change("MainMenu");
