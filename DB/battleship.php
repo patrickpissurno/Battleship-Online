@@ -26,7 +26,7 @@ if(!empty($_GET["act"]))
 					while($row = mysqli_fetch_assoc($result)) {
 						echo "user=".$row["user"]. ";" .
 						"wins=".$row["wins"]. ";" .
-						"loses=".$row["user"]. ";" .
+						"loses=".$row["loses"]. ";" .
 						"";
 					}
 				} else {
