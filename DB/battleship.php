@@ -308,7 +308,54 @@ if(!empty($_GET["act"]))
 					die ("-1");
             }
             break;
+        case "insert_player":
+            if(!empty($_POST["user"]) && !empty($_POST["pass"]))
+            {
+                $sql = "SELECT * FROM `users` WHERE `user`='".$_POST["user"]."'";
+				$result = mysqli_query($conn, $sql);
+				if (!(mysqli_num_rows($result) > 0)) {
+					$sql = "INSERT INTO `users` (user, pass, wins, loses, last_online)
+					VALUES ('". $_POST["user"] ."', '" . $_POST["pass"] . "', 0, 0, 0)";
+                    if (mysqli_query($conn, $sql)) {
+                        die("'" . $_POST["user"] . "' registered successfully.");
+                    }
+                    else
+                        die("Error: can't register '" . $_POST["user"] . "' to the database");
+				}
+                else
+                    die("Username already exists.");
+            }
+            else
+                die("Username/password cannot be empty.");
+            break;
+        case "register":
+            echo '
+                <center>
+                <h1>BattleShip Online</h1>
+                <h3>Register</h3>
+                <form action="battleship.php?act=insert_player" method="post">
+                    Username:<br>
+                    <input type="text" name="user" value="">
+                    <br>
+                    Password:<br>
+                    <input type="password" name="pass" value="">
+                    <br><br>
+                    <input type="submit" value="Register">
+                </form>
+            ';
+            break;
 	}
+}
+else
+{
+    echo '
+        <center>
+        <h1>BattleShip Online</h1>
+        <h3>A remake of the classic</h3>
+        <a href="battleship.php?act=register">Register</a>
+        <a href="#">Download</a>
+        </center>
+    ';
 }
 
 mysqli_close($conn);
