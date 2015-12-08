@@ -40,6 +40,8 @@ public class MainController : MonoBehaviour {
 
     public Text MainGameTitle;
     private Text MainGameMessage;
+    public Text LoginTitle;
+    private Text LoginMessage;
 
     public Text MapSetupMessage;
 
@@ -59,6 +61,7 @@ public class MainController : MonoBehaviour {
         gameController = GetComponent<GameController>();
         playerController = GetComponent<PlayerController>();
         MainGameMessage = MainGameTitle.transform.Find("ErrorMessage").GetComponent<Text>();
+        LoginMessage = LoginTitle.transform.Find("ErrorMessage").GetComponent<Text>();
     }
 	void Start () {
         GetComp();
@@ -102,13 +105,13 @@ public class MainController : MonoBehaviour {
                         User = "";
                         Pass = "";
                         Signed = false;
-                        print("Invalid Pass");
+                        LoginError("Invalid Password");
                         break;
                     case "-1":
                         User = "";
                         Pass = "";
                         Signed = false;
-                        print("User not fount");
+                        LoginError("User not found");
                         break;
 
                     default:
@@ -118,6 +121,12 @@ public class MainController : MonoBehaviour {
             }
             Waiting = false;
         }
+    }
+    
+    public void LoginError(string str)
+    {
+        LoginMessage.text = str;
+        print(str);
     }
 
     public void MainMenu()
