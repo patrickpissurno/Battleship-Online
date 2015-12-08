@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 03-Dez-2015 às 02:12
+-- Generation Time: 08-Dez-2015 às 20:49
 -- Versão do servidor: 5.6.16
 -- PHP Version: 5.5.11
 
@@ -54,15 +54,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `loses` int(9) NOT NULL,
   `last_online` varchar(30) NOT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
-
---
--- Extraindo dados da tabela `users`
---
-
-INSERT INTO `users` (`id`, `user`, `pass`, `wins`, `loses`, `last_online`) VALUES
-(1, 'teste', '123', 0, 0, '1449105163'),
-(2, 'teste2', '123', 0, 0, '1449105163');
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

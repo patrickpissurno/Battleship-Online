@@ -348,14 +348,100 @@ if(!empty($_GET["act"]))
 }
 else
 {
+    echo WriteStyle();
     echo '
+        <div class="form">
+            <ul class="tab-group">
+                <li class="tab active"><a href="#signup" id="register">Sign Up</a></li>
+                <li class="tab"><a href="#login">Log In</a></li>
+                <li class="tab"><a href="#download">Download</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="signup">   
+                    <h1>Sign Up for Free</h1>
+                    <form action="battleship.php?act=insert_player" method="post">
+                        <div class="field-wrap">
+                            <label>
+                                Email Address
+                            </label>
+                            <input type="email" autocomplete="off"/>
+                        </div>
+                        <div class="field-wrap">
+                            <label>
+                                Username<span class="req">*</span>
+                            </label>
+                            <input type="text"required autocomplete="off" name="user"/>
+                        </div>
+                        <div class="field-wrap">
+                            <label>
+                                Password<span class="req">*</span>
+                            </label>
+                            <input type="password"required autocomplete="off" name="pass"/>
+                        </div>
+                        <button type="submit" class="button button-block"/>Register</button>
+                    </form>
+                </div>
+                <div id="login">   
+                    <h1>Welcome Back!</h1>
+                    <center>
+                        <p style="color:white;">This page is for test purpose only. It doesn\'t work yet</p>
+                    </center>
+                    <form action="battleship.php" method="post">
+                    <div class="field-wrap">
+                        <label>
+                            Username<span class="req">*</span>
+                        </label>
+                        <input type="text"required autocomplete="off"/>
+                    </div>
+                    <div class="field-wrap">
+                        <label>
+                            Password<span class="req">*</span>
+                        </label>
+                        <input type="password"required autocomplete="off"/>
+                    </div>
+                    <p class="forgot"><a href="#">Forgot Password?</a></p>
+                    <button class="button button-block"/>Log In</button>
+                    </form>
+                </div>
+                <div id="download">   
+                    <h1>Download the client</h1>
+                    <p style="color:white">
+                        This game is in early development, so bugs are expected and we\'d be very happy if you report them to us at patrickpissurno.nave@gmail.com. Thanks!
+                    </p>
+                    <button class="button button-block"/>Download</button>
+                </div>
+            </div>
+        </div>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="battleship.js"></script>
+    ';
+    echo "</body></html>";
+    /*echo '
         <center>
         <h1>BattleShip Online</h1>
         <h3>A remake of the classic</h3>
         <a href="battleship.php?act=register">Register</a>
         <a href="#">Download</a>
         </center>
+    ';*/
+}
+
+
+function WriteStyle()
+{
+    $str = '
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="UTF-8">
+        <title>Battleship Online</title>
+        <link href="http://fonts.googleapis.com/css?family=Titillium+Web:400,300,600" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="battleship.css">
+        </head>
+        <body>
+        <center><a id="header">Battleship Online</a></center>
     ';
+    return $str;
 }
 
 mysqli_close($conn);

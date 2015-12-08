@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,7 +47,7 @@ public class MainController : MonoBehaviour {
 
     public bool GameEnded = false;
 
-    public const string SERVER_ADDRESS = "localhost/battleship.php";
+    public const string SERVER_ADDRESS = "http://patrickpissurno.com.br/battleship.php";
 
     void Awake()
     {
@@ -611,5 +611,10 @@ public class MainController : MonoBehaviour {
             Application.LoadLevel(0);
             Waiting = false;
         }
+    }
+    
+    public void Register()
+    {
+        Application.OpenURL("http://patrickpissurno.com.br/battleship.php");
     }
 }
